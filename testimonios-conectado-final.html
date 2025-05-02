@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Testimonios de Usuarios</title>
+  <style>
+    .oculto { display: none; }
+    .titulo-seccion {
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 1em;
+    }
+    .carrusel-contenedor {
+      position: relative;
+      max-width: 600px;
+      margin: auto;
+      overflow: hidden;
+    }
+    .carrusel {
+      display: flex;
+      flex-direction: column;
+    }
+    .testimonio-slide {
+      display: none;
+      padding: 1.5em;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .testimonio-slide.activo {
+      display: block;
+    }
+    .carrusel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(92, 107, 192, 0.9);
+      border: none;
+      color: white;
+      padding: 0.5em 1em;
+      cursor: pointer;
+      font-size: 1.5em;
+      border-radius: 50%;
+      z-index: 10;
+    }
+    .carrusel-btn.izquierda { left: -15px; }
+    .carrusel-btn.derecha { right: -15px; }
+    .button-toggle {
+      background-color: #5c6bc0;
+      color: white;
+      border: none;
+      padding: 0.6em 1.2em;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: background 0.3s;
+    }
+    .button-toggle.activo {
+      background-color: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+
+<section class="section" id="testimonios">
+  <h2 class="titulo-seccion">Testimonios de usuarios</h2>
+  <div class="carrusel-contenedor">
+    <button class="carrusel-btn izquierda" onclick="cambiarSlide(-1)">&#10094;</button>
+    <div class="carrusel" id="carrusel-testimonios">
+      <div class="testimonio-slide activo">
+        <strong>María L.</strong>
+        <p>"Gracias a Adopta un Sabio encontré consejos valiosos para mi negocio."</p>
+      </div>
+      <div class="testimonio-slide">
+        <strong>Carlos P.</strong>
+        <p>"La experiencia de los sabios me inspiró a cambiar de carrera."</p>
+      </div>
+      <div class="testimonio-slide">
+        <strong>Laura G.</strong>
+        <p>"Una conexión genuina y enriquecedora."</p>
+      </div>
+      <div class="testimonio-slide">
+        <strong>Eduardo M.</strong>
+        <p>"Conversar con un sabio me dio claridad sobre decisiones importantes."</p>
+      </div>
+      <div class="testimonio-slide">
+        <strong>Renata Z.</strong>
+        <p>"Me sentí escuchada como nunca antes. Los sabios tienen un gran corazón."</p>
+      </div>
+      <div class="testimonio-slide">
+        <strong>Javier T.</strong>
+        <p>"Sus historias me ayudaron a entender la vida con otra perspectiva."</p>
+      </div>
+    </div>
+    <button class="carrusel-btn derecha" onclick="cambiarSlide(1)">&#10095;</button>
+  </div>
+
+  <div style="text-align: center; margin-top: 2em;">
+    <button class="button-toggle" id="toggleFormularioBtn" onclick="toggleFormulario()">Deja aquí tu testimonio</button>
+  </div>
+
+  <div id="formulario-testimonio" class="oculto" style="margin-top: 2em;">
+    <form id="testimonioForm" style="max-width: 600px; margin: auto; background: #fff; padding: 1.5em; border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.1);">
+      <div style="margin-bottom: 1em;">
+        <label for="nombre"><strong>Nombre:</strong></label>
+        <input type="text" id="nombre" name="nombre" maxlength="50" required style="width: 100%; padding: 0.5em;">
+      </div>
+      <div style="margin-bottom: 1em;">
+        <label for="testimonio"><strong>Testimonio (máx. 92 caracteres):</strong></label>
+        <input type="text" id="testimonio" name="testimonio" maxlength="92" required style="width: 100%; padding: 0.5em;">
+        <small id="contador">92 caracteres restantes</small>
+      </div>
+      <div style="margin-bottom: 1em;">
+        <label for="fecha"><strong>Fecha:</strong></label>
+        <input type="date" id="fecha" name="fecha" required style="width: 100%; padding: 0.5em;">
+      </div>
+      <div style="margin-bottom: 1em;">
+        <label><strong>¿Eres humano? Resuelve:</strong></label><br>
+        <span id="captcha-operacion"></span>
+        <input type="number" id="captcha-respuesta" required style="width: 100%; padding: 0.5em; margin-top: 0.3em;">
+        <span id="captcha-validado" style="display: none; color: green; font-weight: bold;">✓ Verificado</span>
+      </div>
+      <button type="submit" class="button-toggle" style="margin-top: 1em;">Enviar testimonio</button>
+    </form>
+  </div>
+
+  <div style="text-align: center; margin-top: 2.5em;">
+    <a href="#inicio" class="button-toggle">Inicio</a>
+  </div>
+</section>
+
+<script>
+  window.onload = function () {
+    let indiceActual = 0;
+    const slides = document.querySelectorAll('.testimonio-slide');
+    const captchaOperacion = document.getElementById("captcha-operacion");
+    const captchaRespuesta = document.getElementById("captcha-respuesta");
+    const captchaValidado = document.getElementById("captcha-validado");
+    const toggleBtn = document.getElementById("toggleFormularioBtn");
+    const inputTestimonio = document.getElementById("testimonio");
+    const contadorTexto = document.getElementById("contador");
+    const MAX_CARACTERES = 92;
+
+    function mostrarSlide(indice) {
+      slides.forEach((slide, i) => slide.classList.remove('activo'));
+      slides[indice].classList.add('activo');
+    }
+
+    function cambiarSlide(direccion) {
+      indiceActual = (indiceActual + direccion + slides.length) % slides.length;
+      mostrarSlide(indiceActual);
+    }
+
+    function autoAvance() {
+      cambiarSlide(1);
+    }
+
+    function limitarTestimonios(maximo = MAX_CARACTERES) {
+      const textos = document.querySelectorAll('.testimonio-slide p');
+      textos.forEach(p => {
+        if (p.textContent.length > maximo) {
+          p.textContent = p.textContent.slice(0, maximo).trim() + '...';
+        }
+      });
+    }
+
+    function actualizarContador() {
+      const restante = MAX_CARACTERES - inputTestimonio.value.length;
+      contadorTexto.textContent = `${restante} caracteres restantes`;
+    }
+
+    function toggleFormulario() {
+      const form = document.getElementById("formulario-testimonio");
+      form.classList.toggle("oculto");
+      toggleBtn.classList.toggle("activo");
+      toggleBtn.textContent = form.classList.contains("oculto") ? "Deja aquí tu testimonio" : "Cerrar formulario";
+      if (!form.classList.contains("oculto")) {
+        generarCaptcha();
+        actualizarContador();
+      }
+    }
+
+    function generarCaptcha() {
+      const a = Math.floor(Math.random() * 9) + 1;
+      const b = Math.floor(Math.random() * 9) + 1;
+      captchaOperacion.textContent = `${a} + ${b} = `;
+      captchaOperacion.dataset.resultado = a + b;
+      captchaRespuesta.value = "";
+      captchaValidado.style.display = "none";
+    }
+
+    captchaRespuesta.addEventListener("input", () => {
+      const esperado = parseInt(captchaOperacion.dataset.resultado);
+      const actual = parseInt(captchaRespuesta.value);
+      captchaValidado.style.display = actual === esperado ? "inline" : "none";
+    });
+
+    inputTestimonio.addEventListener("input", actualizarContador);
+
+    document.getElementById("testimonioForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const nombre = document.getElementById("nombre").value.trim();
+      const testimonio = inputTestimonio.value.trim();
+      const fecha = document.getElementById("fecha").value;
+      const captchaOK = captchaValidado.style.display === "inline";
+
+      if (!nombre || !testimonio || !fecha || !captchaOK) {
+        alert("Por favor, completa todos los campos y verifica el captcha.");
+        return;
+      }
+
+      const url = "https://script.google.com/macros/s/AKfycbxbl6XDcWRQ9tqtvSKWrsW_3eI17Ayaa3FxP9ZlIsZ1cU4CN475c448bz7WQFY7vSom/exec";
+      const data = new FormData();
+      data.append("nombre", nombre);
+      data.append("testimonio", testimonio);
+      data.append("fecha", fecha);
+      data.append("captcha", "ok");
+
+      fetch(url, {
+        method: "POST",
+        body: data
+      })
+        .then(response => response.text())
+        .then(res => {
+          if (res === "OK") {
+            alert("¡Gracias por tu testimonio!");
+            document.getElementById("testimonioForm").reset();
+            captchaValidado.style.display = "none";
+            generarCaptcha();
+            actualizarContador();
+          } else {
+            alert("Error al enviar. Intenta de nuevo.");
+          }
+        })
+        .catch(err => {
+          alert("Error de conexión.");
+          console.error(err);
+        });
+    });
+
+    mostrarSlide(indiceActual);
+    setInterval(autoAvance, 5000);
+    limitarTestimonios();
+    actualizarContador();
+
+    window.cambiarSlide = cambiarSlide;
+    window.toggleFormulario = toggleFormulario;
+  };
+</script>
+
+</body>
+</html>
